@@ -1,23 +1,29 @@
 import requests
 from bs4 import BeautifulSoup
-import json
+import csv
 
 
-def scrap():
-    scraped_data = []
-    response = requests.get('https://www.bbc.com/')
-    soup = BeautifulSoup(response.text, "html.parser")
-    
-    for elm in soup.find_all('a', class_="media__link", rev="news|headline"):
-        scraped_data.append(
-                {
-                    
-                    "title": elm.text.replace('\n', ''),
-                    "link": elm.get("href")
-                }
-            )
-        
+response = requests.get('https://www.bbc.com/').text
+soup = BeautifulSoup(response, "lxml")
+csv_file = open('data.csv.', 'w')
+writer = csv.writer(csv_file)
+writer.writerow(["Url", "Title", "Source"])
 
-    print(json.dumps(scraped_data, indent=2))
+new_div = soup.find("section", class_="module--news")
+div_content = new_div.find("div", class_="module__content")
+div_content2 = div_content.find_all("div", class_="media__content")
+#print(div_content2.prettify())
 
-scrap()    
+
+for elm in div_content2 :
+    url = elm.h3.a.text
+    title = elm.p.text
+    source = elm.findAll('a')[1].text
+
+    print("Url : ", url.strip())
+    print("Title : ", title.strip())
+    print("Source : ", source.strip())
+
+    print()
+    writer.writerow([url, title, source])
+    csv_file.close 
